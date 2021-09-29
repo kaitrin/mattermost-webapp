@@ -187,7 +187,7 @@ describe('components/Menu', () => {
         expect(wrapper).toMatchSnapshot();
     });
 
-    test('should not show Marketplace modal in web view', () => {
+    test('should show Marketplace modal', () => {
         const store = mockStore(defaultState);
 
         const props = {
@@ -200,24 +200,7 @@ describe('components/Menu', () => {
             </Provider>,
         );
 
-        expect(wrapper.find('#marketplaceModal')).toEqual({});
-    });
-
-    test('should show Marketplace modal in mobile view', () => {
-        const store = mockStore(defaultState);
-
-        const props = {
-            ...defaultProps,
-            mobile: true,
-            enablePluginMarketplace: true,
-        };
-        const wrapper = mountWithIntl(
-            <Provider store={store}>
-                <MainMenu {...props}/>
-            </Provider>,
-        );
-
-        expect(wrapper.find('#marketplaceModal').at(0).prop('show')).toEqual(true);
+        expect(wrapper.find('#marketplaceModal').at(0).props().show).toEqual(true);
     });
 
     test('should show leave team option when primary team is set', () => {
@@ -239,50 +222,54 @@ describe('components/Menu', () => {
         expect(wrapper.find('#leaveTeam').props().show).toEqual(true);
     });
 
-    test('mobile view should show subscribe now button when in trial period', () => {
-        const props = {...defaultProps, mobile: true, isCloud: true, isFreeTrial: true};
-        const wrapper = getMainMenuWrapper(props);
+    describe('should show integrations', () => {
+        it('when incoming webhooks enabled', () => {
+            const props = {...defaultProps, enableIncomingWebhooks: true};
+            const wrapper = getMainMenuWrapper(props);
 
-        expect(wrapper.find('UpgradeLink')).toHaveLength(1);
-    });
+            expect(wrapper.find('#integrations').prop('show')).toBe(true);
+        });
 
-    test('mobile view should hide the subscribe now button when NOT in trial period', () => {
-        const props = {...defaultProps, mobile: true, isCloud: true, isFreeTrial: false};
-        const wrapper = getMainMenuWrapper(props);
+        it('when outgoing webhooks enabled', () => {
+            const props = {...defaultProps, enableOutgoingWebhooks: true};
+            const wrapper = getMainMenuWrapper(props);
 
-        expect(wrapper.find('UpgradeLink')).toHaveLength(0);
-    });
+            expect(wrapper.find('#integrations').prop('show')).toBe(true);
+        });
 
-    test('mobile view should hide the subscribe now button when is NOT cloud', () => {
-        const props = {...defaultProps, mobile: true, isCloud: false, isFreeTrial: false};
-        const wrapper = getMainMenuWrapper(props);
+        it('when slash commands enabled', () => {
+            const props = {...defaultProps, enableCommands: true};
+            const wrapper = getMainMenuWrapper(props);
 
-        expect(wrapper.find('UpgradeLink')).toHaveLength(0);
-    });
+            expect(wrapper.find('#integrations').prop('show')).toBe(true);
+        });
 
-    test('mobile view should hide the subscribe now button when does not have permissions', () => {
-        const noPermissionsState = {...defaultState};
-        noPermissionsState.entities.roles.roles.system_manager.permissions = [];
-        const store = mockStore(noPermissionsState);
+        it('when oauth providers enabled', () => {
+            const props = {...defaultProps, enableOAuthServiceProvider: true};
+            const wrapper = getMainMenuWrapper(props);
 
-        const wrapper = mountWithIntl(
-            <Provider store={store}>
-                <MainMenu {...defaultProps}/>
-            </Provider>,
-        );
+            expect(wrapper.find('#integrations').prop('show')).toBe(true);
+        });
 
-        expect(wrapper.find('UpgradeLink')).toHaveLength(0);
-    });
+        it('when can manage system bots', () => {
+            const props = {...defaultProps, canManageSystemBots: true};
+            const wrapper = getMainMenuWrapper(props);
 
-    test('mobile view should hide start trial menu item because user state does not have permission to write license', () => {
-        const store = mockStore(defaultState);
+            expect(wrapper.find('#integrations').prop('show')).toBe(true);
+        });
 
-        const wrapper = mountWithIntl(
-            <Provider store={store}>
-                <MainMenu {...defaultProps}/>
-            </Provider>,
-        );
+        it('unless mobile', () => {
+            const props = {...defaultProps, mobile: true, canManageSystemBots: true};
+            const wrapper = getMainMenuWrapper(props);
 
-        expect(wrapper.find('#startTrial')).toHaveLength(0);
+            expect(wrapper.find('#integrations').prop('show')).toBe(false);
+        });
+
+        it('unless cannot manage integrations', () => {
+            const props = {...defaultProps, canManageIntegrations: false, enableCommands: true};
+            const wrapper = getMainMenuWrapper(props);
+
+            expect(wrapper.find('#integrations').prop('show')).toBe(false);
+        });
     });
 });
