@@ -18,6 +18,7 @@ import CommentIcon from 'components/post_view/comment_icon';
 import DotMenu from 'components/dot_menu';
 import OverlayTrigger from 'components/overlay_trigger';
 import PostFlagIcon from 'components/post_view/post_flag_icon';
+import PostTaskIcon from 'components/post_view/post_task_icon';
 import PostReaction from 'components/post_view/post_reaction';
 import PostTime from 'components/post_view/post_time';
 import InfoSmallIcon from 'components/widgets/icons/info_small_icon';
@@ -253,6 +254,16 @@ export default class PostInfo extends React.PureComponent<Props, State> {
             );
         }
 
+        const showTaskIcon = !isSystemMessage && !isMobile && hover;
+        let postTaskIcon;
+        if (showTaskIcon) {
+            postTaskIcon = (
+                <PostTaskIcon
+                    message={post.message}
+                />
+            );
+        }
+
         return (
             <div
                 ref={this.dotMenuRef}
@@ -262,6 +273,7 @@ export default class PostInfo extends React.PureComponent<Props, State> {
                 {!collapsedThreadsEnabled && dotMenu}
                 {postReaction}
                 {postFlagIcon}
+                {postTaskIcon}
                 {commentIcon}
                 {collapsedThreadsEnabled && dotMenu}
             </div>
